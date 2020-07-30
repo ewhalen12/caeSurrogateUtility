@@ -25,7 +25,9 @@ predictions = [np.array([0.0, 0.2, 0.2]),
                np.array([1.6, 0.1, 0.6])]
 ```
 
-Depending on the context, you may be interested in error metrics at the point level:
+There are many possible ways to quantify the predictive performance. Depending on the context, you may be interested in error metrics at the point, part, or set levels.
+
+#### Point-level metrics:
 ```
 cu.computeFieldLossMetrics(trueFields, predictions, level='point')
 ```
@@ -37,7 +39,7 @@ cu.computeFieldLossMetrics(trueFields, predictions, level='point')
   array([ 1. ,  0. , -0.8]),
   array([0.05882353, 0.5       , 0.        ])]}
 ```
-...the part level:
+#### Part-level metrics:
 ```
 cu.computeFieldLossMetrics(trueFields, predictions, level='part')
 ```
@@ -49,7 +51,7 @@ cu.computeFieldLossMetrics(trueFields, predictions, level='part')
  'maxAE/peak': [0.33333333333333337, 0.8, 0.05882352941176471],
  'relEAtPeak': [0.33333333333333326, 0.8, 0.05882352941176463]}
 ```
-...or error metrics for the entire set:
+#### Set-level metrics:
 ```
 cu.computeFieldLossMetrics(trueFields, predictions, level='set')
 ```
