@@ -14,7 +14,7 @@ sys.path.append('{repo path}/caeSurrogateUtility')
 import caeUtility as cu
 ```
 
-In surrogate modeling, it's common to have a list of numpy arrays representing a set of field data. The fields could represent mechanical stresses, fluid velocities, or electric potential. We often want to compare these true fields to their corresponding predictions
+In surrogate modeling, it's common to have a list of numpy arrays representing a set of fields. The fields could represent mechanical stresses, fluid velocities, or electric potential for one part in a set. We often want to compare these true fields to their corresponding predictions:
 ```
 trueFields = [np.array([0.1, 0.2, 0.3]), 
               np.array([0.1, 0.2, 0.5]),
@@ -37,7 +37,7 @@ cu.computeFieldLossMetrics(trueFields, predictions, level='point')
   array([ 1. ,  0. , -0.8]),
   array([0.05882353, 0.5       , 0.        ])]}
 ```
-...the part (field) level:
+...the part level:
 ```
 cu.computeFieldLossMetrics(trueFields, predictions, level='part')
 ```
