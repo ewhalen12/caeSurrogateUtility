@@ -4,11 +4,11 @@ import sklearn.metrics as skm
 ########################################################################
 # takes in two lists of numpy arrays (representing fields) and calculates
 # several loss metrics
-def computeFieldLossMetrics(truths, preds, level='part'):
+def computeFieldLossMetrics(truths, preds, level='field'):
     assert len(truths) > 0, 'truths must be a nonmepty list'
     assert len(preds) > 0, 'preds must be a nonmepty list'
     assert len(truths) == len(preds), 'truths and preds should be the same length'
-    assert level in ['point', 'part', 'set'], 'level must be either \'point\', \'part\' or \'set\''
+    assert level in ['point', 'field', 'set'], 'level must be either \'point\', \'field\' or \'set\''
     
     metrics = {}
     
@@ -20,11 +20,11 @@ def computeFieldLossMetrics(truths, preds, level='part'):
         metrics['relErrs'] = [e/t for e, t in zip(errorList, truths)]
         return metrics
     
-    # ---part-level metrics--- 
+    # ---field-level metrics--- 
     truePeakList = [np.max(np.abs(t)) for t in truths]
     predPeakList = [np.max(np.abs(p)) for p in preds]
     
-    if level == 'part':
+    if level == 'field':
         metrics['mse'] = [np.mean(e**2) for e in errorList]
         metrics['mae'] = [np.mean(np.abs(e)) for e in errorList]
         metrics['maxAE'] = [np.max(np.abs(e)) for e in errorList]
