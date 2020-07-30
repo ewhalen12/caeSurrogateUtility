@@ -1,20 +1,14 @@
 import numpy as np
 import sklearn.metrics as skm
-import torch
 
 ########################################################################
 # takes in two lists of numpy arrays (representing fields) and calculates
 # several loss metrics
-def computeLossMetrics(truths, preds, level='part'):
+def computeFieldLossMetrics(truths, preds, level='part'):
     assert len(truths) > 0, 'truths must be a nonmepty list'
     assert len(preds) > 0, 'preds must be a nonmepty list'
     assert len(truths) == len(preds), 'truths and preds should be the same length'
-    
-    if type(truths[0]) == torch.Tensor:
-        truths = [t.numpy() for t in truths]
-        
-    if type(preds[0]) == torch.Tensor:
-        preds = [p.numpy() for p in preds]
+    assert level in ['point', 'part', 'set'], 'level must be either \'point\', \'part\' or \'set\''
     
     metrics = {}
     
@@ -23,6 +17,7 @@ def computeLossMetrics(truths, preds, level='part'):
     
     if level == 'point':
         metrics['errors'] = errorList
+        metrics['relErrs'] = [e/t for e, t in zip(errorList, truths)]
         return metrics
     
     # ---part-level metrics--- 
