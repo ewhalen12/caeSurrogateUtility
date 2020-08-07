@@ -2,8 +2,8 @@ import numpy as np
 import sklearn.metrics as skm
 
 ###############################################################################
-# takes in two lists of numpy arrays (representing fields) and calculates
-# several loss metrics
+# Takes in two lists of numpy arrays (representing fields) and calculates
+# several loss metrics on the user specified level.
 def computeFieldLossMetrics(truths, preds, level='field'):
     assert len(truths) > 0, 'truths must be a nonmepty list'
     assert len(preds) > 0, 'preds must be a nonmepty list'
@@ -24,17 +24,10 @@ def computeFieldLossMetrics(truths, preds, level='field'):
     # ---point-aggregate-level metrics---
     if level == 'point_agg':
         assert all([preds[0].shape == p.shape for p in preds]), 'point_agg metrics require that all fields are the same shape'
-        stackedPreds = np.stack(preds)
-        stackedTruths = np.stack(truths)
         stackedErrors = np.stack(errorList)
-        pointAggR2 = np.zeros(preds[0].shape)
-        for ij in np.ndindex(preds[0].shape):
-            pointAggR2[ij] = skm.r2_score(stackedTruths[(slice(None),)+ij], 
-                                          stackedPreds[(slice(None),)+ij])
-            
         metrics['mse'] = np.mean(stackedErrors**2, axis=0)
         metrics['mae'] = np.mean(np.abs(stackedErrors), axis=0)
-        metrics['r2'] = pointAggR2
+        metrics['r2'] = _pointAggR2(truths, preds)
         return metrics
         
     
@@ -57,12 +50,13 @@ def computeFieldLossMetrics(truths, preds, level='field'):
         metrics['mse'] = np.mean(concatErrors**2)
         metrics['mae'] = np.mean(np.abs(concatErrors))
         metrics['peakR2'] = skm.r2_score(truePeakList, predPeakList)
+        metrics['meanAggR2'] = np.mean(_pointAggR2(truths, preds))
         return metrics
 
 ###############################################################################
-# calculates loss metrics for a model that simply predicts the mean.
-# can be used as a baseline for predictive models. Truths is a list of numpy 
-# arrays. level is the result level from 
+# Calculates loss metrics for a model that always predicts the mean.
+# Can be used as a baseline for predictive models. truths is a list of numpy 
+# arrays. level is the result level from computeFieldLossMetrics
 def baseline(truths, level='field', avgLevel=None):
     assert len(truths) > 0, 'truths must be a nonmepty list'
     assert level in ['point', 'point_agg', 'field', 'set'], 'level must be either \'point\', \'point_agg\', \'field\' or \'set\''
@@ -80,4 +74,14 @@ def baseline(truths, level='field', avgLevel=None):
     
     return computeFieldLossMetrics(truths, preds, level=level)
 
-    
+
+###############################################################################
+# helper functions
+def _pointAggR2(truths, preds):
+    stackedPreds = np.stack(preds)
+    stackedTruths = np.stack(truths)
+    pointAggR2 = np.zeros(preds[0].shape)
+    for ij in np.ndindex(preds[0].shape):
+        pointAggR2[ij] = skm.r2_score(stackedTruths[(slice(None),)+ij], 
+                                      stackedPreds[(slice(None),)+ij])
+    return pointAggR2
