@@ -60,3 +60,14 @@ cu.computeFieldLossMetrics(trueFields, predictions, level='set')
  'mse': 0.02333333333333333,
  'peakR2': 0.8430232558139534}
 ```
+
+#### Point aggregate-level metrics:
+For the special case when a correspondence exists between points across fields (e.g. if all fields have the same mesh), we can define aggregate metrics over each point as follows
+```
+cu.computeFieldLossMetrics(trueFields, predictions, level='point_agg')
+```
+```
+{'mse': array([0.01      , 0.00333333, 0.05666667]),
+ 'mae': array([0.1       , 0.03333333, 0.16666667]),
+ 'r2': array([ 9.82421875e-01, -4.32691405e+30, -2.64285714e+00])}
+```
