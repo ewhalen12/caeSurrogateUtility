@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn.metrics as skm
 
-########################################################################
+###############################################################################
 # takes in two lists of numpy arrays (representing fields) and calculates
 # several loss metrics
 def computeFieldLossMetrics(truths, preds, level='field'):
@@ -9,7 +9,7 @@ def computeFieldLossMetrics(truths, preds, level='field'):
     assert len(preds) > 0, 'preds must be a nonmepty list'
     assert len(truths) == len(preds), 'truths and preds should be the same length'
     assert all([t.shape == p.shape for t, p in zip(truths, preds)]), 'the shape of all predicted fields must match the shape of their corresponding truth'
-    assert level in ['point', 'point_agg', 'field', 'set'], 'level must be either \'point\', \'field\' or \'set\''
+    assert level in ['point', 'point_agg', 'field', 'set'], 'level must be either \'point\', \'point_agg\', \'field\' or \'set\''
     
     metrics = {}
     
@@ -58,4 +58,26 @@ def computeFieldLossMetrics(truths, preds, level='field'):
         metrics['mae'] = np.mean(np.abs(concatErrors))
         metrics['peakR2'] = skm.r2_score(truePeakList, predPeakList)
         return metrics
+
+###############################################################################
+# calculates loss metrics for a model that simply predicts the mean.
+# can be used as a baseline for predictive models. Truths is a list of numpy 
+# arrays. level is the result level from 
+def baseline(truths, level='field', avgLevel=None):
+    assert len(truths) > 0, 'truths must be a nonmepty list'
+    assert level in ['point', 'point_agg', 'field', 'set'], 'level must be either \'point\', \'point_agg\', \'field\' or \'set\''
+    assert avgLevel in ['point', 'set', None], 'if specified, avgLevel must be either \'point\' or \'set\''
+
+    uniformFields = all([truths[0].shape == t.shape for t in truths])
+
+    if (avgLevel == 'point') or (not avgLevel and uniformFields):
+        assert uniformFields, 'point-based averaging requires that all fields are the same shape'
+        avgField = np.mean(truths, axis=0)
+        preds = [avgField]*len(truths)
+    else:
+        avgVal = np.mean([np.mean(t) for t in truths])
+        preds = [np.full(t.shape, avgVal) for t in truths]
+    
+    return computeFieldLossMetrics(truths, preds, level=level)
+
     
