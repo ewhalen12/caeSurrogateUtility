@@ -10,6 +10,7 @@ def computeFieldLossMetrics(truths, preds, level='field', baselineRef=None):
     assert len(truths) == len(preds), 'truths and preds should be the same length'
     assert all([t.shape == p.shape for t, p in zip(truths, preds)]), 'the shape of all predicted fields must match the shape of their corresponding truth'
     assert level in ['point', 'point_agg', 'field', 'set'], 'level must be either \'point\', \'point_agg\', \'field\' or \'set\''
+    uniformShapes = all([t.shape == truths[0].shape for t in truths])
     
     metrics = {}
     
@@ -25,7 +26,7 @@ def computeFieldLossMetrics(truths, preds, level='field', baselineRef=None):
 
     # ---point-aggregate-level metrics---
     if level == 'point_agg':
-        assert all([preds[0].shape == p.shape for p in preds]), 'point_agg metrics require that all fields are the same shape'
+        assert uniformShapes, 'point-aggregate metrics only apply when all fields have the same dimensions'
         stackedErrors = np.stack(errorList)
         metrics['mse'] = np.mean(stackedErrors**2, axis=0)
         metrics['mae'] = np.mean(np.abs(stackedErrors), axis=0)
@@ -64,9 +65,10 @@ def computeFieldLossMetrics(truths, preds, level='field', baselineRef=None):
             metrics['mae/baseline'] = metrics['mae'] / baselineMetrics['mae']
 
         metrics['peakR2'] = skm.r2_score(truePeakList, predPeakList)
-        metrics['maxAggR2'] = np.max(_pointAggR2(truths, preds))
-        metrics['meanAggR2'] = np.mean(_pointAggR2(truths, preds))
-        metrics['minAggR2'] = np.min(_pointAggR2(truths, preds))
+        if uniformShapes:
+            metrics['maxAggR2'] = np.max(_pointAggR2(truths, preds))
+            metrics['meanAggR2'] = np.mean(_pointAggR2(truths, preds))
+            metrics['minAggR2'] = np.min(_pointAggR2(truths, preds))
 
         return metrics
 
